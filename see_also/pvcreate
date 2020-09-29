@@ -1,4 +1,0 @@
-lvm
-lvcreate
-pvcreate
-vgcreate

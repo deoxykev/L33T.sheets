@@ -1,9 +1,0 @@
-ssh
-ssh-copy-id
-ssh-keygen
-sshfs
-autossh
-scp
-rsync
-sftp
-mosh

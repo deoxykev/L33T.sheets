@@ -1,5 +1,0 @@
-# regex into pattern
-
-# convert stream in JSON
-ls | rip '(.*)\.(.*)' '{"name": "$1", "ext": "$2"}'
-

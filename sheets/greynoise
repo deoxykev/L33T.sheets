@@ -1,0 +1,30 @@
+# Greynoise
+# Threat intelligence tool that collects & analyzes untargeted, widespread & oportunistic scan & attack activity.
+# https://viz.greynoise.io/
+
+# Installation
+pip install greynoise
+
+# Install API key
+greynoise setup --api-key <your_key>
+
+# Filter IPs from a log file to remove "noise" (scanners)
+cat ip_addresses.txt | greynoise filter 
+
+# Analyze external IPs from a log file for ASN, categories, classifications, countries, OS, organizations & tags
+cat ip_addresses.txt | greynoise analyze
+
+# Find the date a device was first observed 
+greynoise query "ip:<ip_address> first_seen:<yyyy-mm-dd>"
+
+# Determine if a device is a known Tor exit node
+greynoise query "ip:<ip_address> metadata.tor:true"
+
+# Determine what port the device has been observed scanning
+greynoise query "ip:<ip_address> raw_data.scan.port:<port number>"
+
+# Search for devices that use a JA3 hash
+greynoise query "raw_data.ja3.fingerprint:<JA3 fingerprint hash>"
+
+# Query an IP
+greynoise query "ip:<ip_address>"

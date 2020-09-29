@@ -1,8 +1,0 @@
-# stocks (Bash-Snippets)
-# Finds the latest information on a certain stock
-
-# Determine the latest stock information searching by company
-stocks Tesla
-
-# Determine the latest stock information searching by stock ticker
-stocks AAPL

@@ -1,0 +1,13 @@
+# Truffle Hog
+# Search git repos for exposed credentials, api keys & other authentication methods
+# https://github.com/dxa4481/truffleHog
+
+# Installation
+pip install trufflehog
+
+# Search a git repo 
+trufflehog --regex --entropy=false https://github.com/chubin/cheat.sh
+
+# Search a local repo
+trufflehog file:///user/dxa4481/codeprojects/truffleHog/
+

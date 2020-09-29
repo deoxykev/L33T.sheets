@@ -1,9 +1,0 @@
-gunzip
-gzip
-bzip2
-pigz
-zip
-unzip
-zcat
-zless
-xz

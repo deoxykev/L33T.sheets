@@ -1,0 +1,36 @@
+# Bloodhound
+# BloodHound uses graph theory to reveal hidden relationships and attack paths in an Active Directory environment.
+# https://github.com/BloodHoundAD/BloodHound 
+
+# Find all Kerberoastable Users 
+MATCH (n:User)WHERE n.hasspn=true RETURN n
+
+# Find All Kerberoastable Users with passwords last set less than 5 years ago
+MATCH (u:User) WHERE u.hasspn=true AND u.pwdlastset < (datetime().epochseconds -(1825 * 86400)) AND NOT u.pwdlastset IN [-1.0, 0.0] RETURN u.name, u.pwdlastset order by u.pwdlastset 
+
+# Find Kerberoastable Users with a path to DA
+MATCH (u:User {hasspn:true}) MATCH (g:Group) WHERE g.objectid ENDS WITH '-512' MATCH p = shortestPath( (u)-[*1..]->(g)  ) RETURN p
+
+# Find Kerberoastable users and where they are admin to
+OPTIONAL MATCH (u1:User) WHERE u1.hasspn=true OPTIONAL MATCH (u1)-[r:AdminTo]->(c:Computer) RETURN u
+
+# Find machines Domain Users can RDP into
+match p=(g:Group)-[:CanRDP]->(c:Computer) where g.objectid ENDS WITH '-513' return p
+
+# Find all users that have local admin rights
+MATCH p=(m:User)-[r:AdminTo]->(n:Computer) RETURN p
+
+# Find constrained delegation
+MATCH p=(u:User)-[:AllowedToDelegate]->(c:Computer) RETURN p
+
+# Find computers with constrained delegation permissions and the corresponding targets where they allowed to delegate
+MATCH (c:Computer) WHERE c.allowedtodelegate IS NOT NULL RETURN c
+
+# Find users that can be AS-REP roasted
+MATCH (u:User {dontreqpreauth: true}) RETURN u
+
+# Find if any domain user has interesting permissions against a GPO (heavy)
+MATCH p=(u:User)-[r:AllExtendedRights|GenericAll|GenericWrite|Owns|WriteDacl|WriteOwner|GpLink*1..]->(g:GPO) RETURN p
+
+# Find users that have never logged on and account is still active
+MATCH (n:User) WHERE n.lastlogontimestamp=-1.0 AND n.enabled=TRUE RETURN n

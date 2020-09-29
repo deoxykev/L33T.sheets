@@ -1,3 +1,0 @@
-systemctl
-journalctl
-systemd-sysvinit

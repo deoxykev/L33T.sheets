@@ -1,3 +1,0 @@
-# Get basic information about an audio file
-# (like the number of channels, sample rate, duration, etc)
-soxi file.mp3

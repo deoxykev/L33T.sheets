@@ -1,9 +1,0 @@
-mke2fs
-mkfs.cramfs
-mkfs.exfat
-mkfs.fat
-mkfs.minix
-mkfs.ntfs
-mkfs.vfat
-zramctl
-btrfs

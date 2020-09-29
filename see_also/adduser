@@ -1,9 +1,0 @@
-groupadd
-groupdel
-groupmod
-adduser
-deluser
-useradd
-userdel
-usermod
-chsh

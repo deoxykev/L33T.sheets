@@ -1,2 +1,0 @@
-# add driver to initrd/initramfs (nvme in this case)
-dracut --add-drivers nvme -f /boot/initrd-$(uname -r).img $(uname -r)

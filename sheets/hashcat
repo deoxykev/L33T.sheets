@@ -1,0 +1,72 @@
+# Hashcat
+# The world's fastest password cracker
+
+# Use a CUDA GPU + CPU, optimize for passwords 32 char or less, set workload to "insane"
+hashcat -a 0 -m <type> -w 4 --opencl-device-types 1, 2
+
+# Crack a zip password 
+zip2john Zipfile.zip | cut -d ':' -f 2 > hashes.txt
+hashcat -a 0 -m 13600 hashes.txt dict.txt 
+
+
+# Crack a linux password
+## Identify the hash in `/etc/shadow`
+| type | Description                                      | Type |
+|----|--------------------------------------------------|------|
+| 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems|
+|200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems|
+|400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems|
+|1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems|
+
+## Crack linux password using dictionary
+hashcat -a 0 -m <type> linux_hashes.txt dict.txt 
+
+
+# Crack a KRB5TGS hash from Kerboroasting 
+## identify the KRB5TGS hash type based on position of the $
+* 13100 - type 23 - $krb5tgs$23$
+* 19600 - Type 17 - $krb5tgs(7$
+* 19700 - Type 18 - $krb5tgs$18$
+* 18200 - ASREP Type 23 - $krb5asrep$23$
+
+hashcat -a 0 -m 13100 -a 0 krb_hash.txt 
+
+
+# Crack an NTLM hash
+## Domain Controller hash location
+C:\Windows\NTDS\ntds.dit
+
+## Workstation/Server hash location
+C:\Windows\System32\config\SYSTEM` for registry hive 
+
+## Use impacket to dump NTLM hashes
+impacket-secretsdump -system SYSTEM -ntds ntds.dit -hashes lmhash:nthash LOCAL -outputfile ntlm-extract
+
+## Crack NTLM hashes
+hashcat -a 0 -m 1000 -a 0 ntlm_hashes.txt 
+
+
+# Identify a hash https://tools.kali.org/password-attacks/hash-identifier
+hash-identifier <hash>
+
+
+# Bruteforce attack
+hashcat -a 3 -m <type> hash.txt ?a?a?a?a?a?a?a?a
+```
+predefined charsets
+?l = abcdefghijklmnopqrstuvwxyz
+?u = ABCDEFGHIJKLMNOPQRSTUVWXYZ
+?d = 0123456789
+?s = «space»!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+?a = ?l?u?d?s
+?b = 0x00 - 0xff
+```
+
+# Dictionary attack
+hashcat -a 0 -m <type> hash.txt dict.txt
+
+# Dictionary + rules attack 
+hashcat -a 0 -m <type> hash.txt dict.txt -r rule.txt
+
+# Hybrid attack
+hashcat -a 6 -m <type> hash.txt dict.txt ?a?a?a?a
